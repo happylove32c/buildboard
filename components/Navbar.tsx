@@ -64,7 +64,7 @@ export default function Navbar() {
 
       {/* Mobile Navbar */}
       <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t p-4 shadow-inner z-50">
-        <div className="flex justify-around py-2">{renderLinks(true)}</div>
+        <div className="flex justify-around p-4">{renderLinks(true)}</div>
       </nav>
 
       {/* Auth Modal */}
