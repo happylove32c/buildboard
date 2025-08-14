@@ -118,3 +118,24 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes bounce200 {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+
+@keyframes bounce400 {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+
+.animate-bounce200 {
+  animation: bounce200 1.4s infinite ease-in-out;
+  animation-delay: 0.2s;
+}
+
+.animate-bounce400 {
+  animation: bounce400 1.4s infinite ease-in-out;
+  animation-delay: 0.4s;
+}
+

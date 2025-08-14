@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabaseClient";
+import { Spinner } from "@/components/Spinner";
 
 export default function Home() {
   const { user } = useAuth();
@@ -41,7 +42,8 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex flex-col gap-3 justify-center items-center min-h-screen">
+        <Spinner size="lg" className="text-black transition-all duration-300" />
         <p>Loading...</p>
       </div>
     );

@@ -1,67 +1,46 @@
 // app/project/[id]/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/Spinner";
 
 export default function ProjectPage() {
   const { id } = useParams();
-  const numericId = Number(id); // ✅ force int8
+  const numericId = Number(id);
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
 
-  
+  const fetchProject = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("projects")
+      .select("*")
+      .eq("id", numericId)
+      .single();
 
-  // Fetch project
-  useEffect(() => {
-    const fetchProject = async () => {
-      const { data, error } = await supabase
-        .from("projects")
-        .select("*")
-        .eq("id", numericId) // ✅ int8 comparison
-        .single();
-
-      if (error) console.error("Error fetching project:", error.message);
+    if (error) {
+      console.error("Error fetching project:", error.message);
+    } else {
       setProject(data);
-      setLoading(false);
-    };
-
-    if (!isNaN(numericId)) fetchProject();
+    }
+    setLoading(false);
   }, [numericId]);
 
-  // Toggle task completion
-  const toggleTaskCompletion = async (stepIndex: number, taskIndex: number) => {
-    if (!project) return;
-
-    const task = project.build_steps.steps[stepIndex].tasks[taskIndex];
-    const newCompleted = !task.completed;
-
-    // Update locally for snappy UI
-    const updatedProject = { ...project };
-    updatedProject.build_steps.steps[stepIndex].tasks[taskIndex].completed = newCompleted;
-    setProject(updatedProject);
-
-    // Persist just this change
-    setSaving(true);
-    const { error } = await supabase.rpc("update_task_completion", {
-      project_id: numericId, // ✅ int8 param
-      step_idx: stepIndex,
-      task_idx: taskIndex,
-      completed_val: newCompleted
-    });
-
-    if (error) console.error("Error saving task completion:", error.message);
-    setSaving(false);
-  };
+  useEffect(() => {
+    if (!isNaN(numericId)) fetchProject();
+  }, [numericId, fetchProject]);
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p>Loading project...</p>
+      <div className="fixed inset-0 flex justify-center items-center bg-white/80 z-50">
+        <div className="flex flex-col items-center justify-center space-x-2">
+          <Spinner size="lg" className="text-black" />
+          <span className="text-gray-600">Loading project...</span>
+        </div>
       </div>
     );
   }
@@ -110,7 +89,7 @@ export default function ProjectPage() {
           <div className="mb-4">
             <h2 className="font-semibold mb-2">Build Steps</h2>
             <ol className="list-decimal ml-5 space-y-4">
-              {project.build_steps.steps.map((step: any, stepIndex: number) => (
+              {project.build_steps.steps.map((step: any) => (
                 <li key={step.step}>
                   <p className="font-bold">
                     Step {step.step}: {step.title}
@@ -121,7 +100,41 @@ export default function ProjectPage() {
                         <input
                           type="checkbox"
                           checked={!!task.completed}
-                          onChange={() => toggleTaskCompletion(stepIndex, taskIndex)}
+                          onChange={async (e) => {
+                            const completedVal = e.target.checked;
+
+                            // Optimistic UI update
+                            setProject((prev: any) => {
+                              const updated = { ...prev };
+                              updated.build_steps.steps[step.step - 1].tasks[taskIndex].completed =
+                                completedVal;
+                              return updated;
+                            });
+
+                            const { error } = await supabase.rpc(
+                              "update_task_completion_by_day",
+                              {
+                                project_id: numericId,
+                                task_day: task.day,
+                                completed_val: completedVal,
+                              }
+                            );
+
+                            if (error) {
+                              console.error("Error updating completion:", error);
+                              // rollback
+                              setProject((prev: any) => {
+                                const updated = { ...prev };
+                                updated.build_steps.steps[step.step - 1].tasks[taskIndex].completed =
+                                  !completedVal;
+                                return updated;
+                              });
+                              return;
+                            }
+
+                            // Refetch from backend to confirm persisted data
+                            await fetchProject();
+                          }}
                           className="w-4 h-4"
                         />
                         <span
@@ -140,9 +153,6 @@ export default function ProjectPage() {
                 </li>
               ))}
             </ol>
-            {saving && (
-              <p className="text-sm text-gray-500 mt-2">Saving changes...</p>
-            )}
           </div>
         )}
 
