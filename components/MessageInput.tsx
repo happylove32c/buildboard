@@ -58,7 +58,7 @@ export default function MessageInput({ onSend }: MessageInputProps) {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="w-full resize-none overflow-hidden text-base rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary px-4 py-3 pr-20 sm:pr-24 min-h-[3rem] max-h-40"
+              className="w-full bg-gray-300/50 backdrop-blur-md resize-none overflow-hidden text-base rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary px-4 py-3 pr-20 sm:pr-24 min-h-[3rem] max-h-40"
               rows={1}
             />
 

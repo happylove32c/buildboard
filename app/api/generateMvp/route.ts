@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: "You are an expert product strategist. The user will give you a raw idea. Turn it into: 1. A clear MVP description. 2. 3–6 build phases with short explanations. 3. A breakdown of each phase into small, daily tasks. Keep language simple, concise, and actionable." },
+        { role: "system", content: "You are an expert product strategist. The user will give you a raw idea. Turn it into: 1. A nice and suitable short 5-word title 2. A clear MVP description. 3. 3–6 build phases with short explanations. 4. A breakdown of each phase into small, daily tasks. Keep language simple, concise, and actionable." },
         ...messages,
       ],
     });

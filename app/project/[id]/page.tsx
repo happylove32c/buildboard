@@ -9,25 +9,54 @@ import { Button } from "@/components/ui/button";
 
 export default function ProjectPage() {
   const { id } = useParams();
+  const numericId = Number(id); // ✅ force int8
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
+  
+
+  // Fetch project
   useEffect(() => {
     const fetchProject = async () => {
       const { data, error } = await supabase
         .from("projects")
         .select("*")
-        .eq("id", id)
+        .eq("id", numericId) // ✅ int8 comparison
         .single();
 
       if (error) console.error("Error fetching project:", error.message);
-
       setProject(data);
       setLoading(false);
     };
 
-    if (id) fetchProject();
-  }, [id]);
+    if (!isNaN(numericId)) fetchProject();
+  }, [numericId]);
+
+  // Toggle task completion
+  const toggleTaskCompletion = async (stepIndex: number, taskIndex: number) => {
+    if (!project) return;
+
+    const task = project.build_steps.steps[stepIndex].tasks[taskIndex];
+    const newCompleted = !task.completed;
+
+    // Update locally for snappy UI
+    const updatedProject = { ...project };
+    updatedProject.build_steps.steps[stepIndex].tasks[taskIndex].completed = newCompleted;
+    setProject(updatedProject);
+
+    // Persist just this change
+    setSaving(true);
+    const { error } = await supabase.rpc("update_task_completion", {
+      project_id: numericId, // ✅ int8 param
+      step_idx: stepIndex,
+      task_idx: taskIndex,
+      completed_val: newCompleted
+    });
+
+    if (error) console.error("Error saving task completion:", error.message);
+    setSaving(false);
+  };
 
   if (loading) {
     return (
@@ -77,12 +106,43 @@ export default function ProjectPage() {
           </div>
         )}
 
-        {project.build_steps && (
+        {project.build_steps?.steps && (
           <div className="mb-4">
-            <h2 className="font-semibold">Build Steps</h2>
-            <pre className="bg-gray-100 p-3 rounded text-sm overflow-x-auto">
-              {JSON.stringify(project.build_steps, null, 2)}
-            </pre>
+            <h2 className="font-semibold mb-2">Build Steps</h2>
+            <ol className="list-decimal ml-5 space-y-4">
+              {project.build_steps.steps.map((step: any, stepIndex: number) => (
+                <li key={step.step}>
+                  <p className="font-bold">
+                    Step {step.step}: {step.title}
+                  </p>
+                  <ul className="list-none ml-2 mt-2">
+                    {step.tasks.map((task: any, taskIndex: number) => (
+                      <li key={task.day} className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={!!task.completed}
+                          onChange={() => toggleTaskCompletion(stepIndex, taskIndex)}
+                          className="w-4 h-4"
+                        />
+                        <span
+                          className={`${
+                            task.completed
+                              ? "line-through text-gray-400"
+                              : "text-gray-800"
+                          }`}
+                        >
+                          <span className="font-semibold">Day {task.day}:</span>{" "}
+                          {task.task}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ol>
+            {saving && (
+              <p className="text-sm text-gray-500 mt-2">Saving changes...</p>
+            )}
           </div>
         )}
 

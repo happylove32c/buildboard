@@ -74,16 +74,16 @@ export default function Home() {
                   <span className="absolute -left-5 top-1/2 -translate-y-1/2 w-3 h-3 bg-black rounded-full"></span>
 
                   <Link href={`/project/${project.id}`} className="block">
-                    {isRecent(project.created_at) ? (
-                      <div className="bg-purple-100 border border-purple-400 rounded-lg shadow-lg p-4 hover:bg-purple-200 transition">
-                        <h3 className="text-lg font-bold text-purple-800">{project.title}</h3>
-                        <p className="mt-2 text-sm text-gray-700">
-                          <span className="font-semibold">Idea:</span> {project.raw_idea}
-                        </p>
-                        <p className="mt-2 text-sm text-gray-600">
-                          <span className="font-semibold">MVP:</span> {project.mvp_description}
-                        </p>
-                      </div>
+                      {isRecent(project.created_at) ? (
+                        <div className="bg-purple-100 border border-purple-400 rounded-lg shadow-lg p-4 hover:bg-purple-200 transition">
+                          <h3 className="text-lg font-bold text-purple-800">{project.title}</h3>
+                          <p className="mt-2 text-sm text-gray-700">
+                            <span className="font-semibold">Idea:</span> {project.raw_idea}
+                          </p>
+                          <p className="mt-2 text-sm text-gray-600">
+                            <span className="font-semibold">MVP:</span> {project.mvp_description}
+                          </p>
+                        </div>
                     ) : (
                       <div className="bg-white rounded-lg shadow p-4 hover:bg-gray-50 transition">
                         <h3 className="text-lg font-semibold">{project.title}</h3>
