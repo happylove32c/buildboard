@@ -34,16 +34,16 @@ export default function ProjectPage() {
     if (!isNaN(numericId)) fetchProject();
   }, [numericId, fetchProject]);
 
-  if (loading) {
-    return (
-      <div className="fixed inset-0 flex justify-center items-center bg-white/80 z-50">
-        <div className="flex flex-col items-center justify-center space-x-2">
-          <Spinner size="lg" className="text-black" />
-          <span className="text-gray-600">Loading project...</span>
-        </div>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="fixed inset-0 flex justify-center items-center bg-white/80 z-50">
+  //       <div className="flex flex-col items-center justify-center space-x-2">
+  //         <Spinner size="lg" className="text-black" />
+  //         <span className="text-gray-600">Loading project...</span>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   if (!project) {
     return (
