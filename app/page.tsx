@@ -92,7 +92,7 @@ export default function Home() {
                         <p className="text-sm text-gray-500">
                           {new Date(project.created_at).toLocaleDateString()}
                         </p>
-                        <p className="mt-2">{project.description}</p>
+                        <p className="mt-2">{project.MVP_description}</p>
                       </div>
                     )}
                   </Link>
